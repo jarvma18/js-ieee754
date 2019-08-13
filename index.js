@@ -37,7 +37,7 @@ function createBinaryString(value, bits, isLowEndian) {
 
 function precisionToDecimal(value, bits, mantissa) {
   let bias = createBias(bits - mantissa - 1);
-  let sign = parseInt(value[i], 2);
+  let sign = parseInt(value[0], 2);
   let exponent = '';
   let fraction = 0;
   for (let i = 1; i < (bits - mantissa); i++) {
