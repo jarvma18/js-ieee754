@@ -8,63 +8,44 @@ function createSign(value) {
   if (value === 0) {
     value = 1 / value;
   }
-  return value ? value < 0 ? -1 : 1 : 0;
+  return value ? value < 0 ? 1 : 0 : 0;
 }
 
 function createUnsignedBinaryString(value, unsignedLength) {
   let binary = (value >>> 0).toString(2);
-  let unsigned = '';
   for (let i = binary.length; i < unsignedLength; i++) {
-    unsigned += '0';
+    binary = '0' + binary;
   }
-  return unsigned + binary;
+  return binary;
 }
 
 function createBinaryString(value, bits, isLowEndian) {
-  let bytes = bits / 8;
-  let valueLength = value.length;
+  let signedLength = value.length;
   let binary = '';
-  if (valueLength === 0) {
+  if (!signedLength) {
     throw new Error('Object has no length');
   }
   if (value && isLowEndian) {
     value.reverse();
   }
-  if (valueLength === bytes || valueLength === (bytes / 2)) {
-    let unsignedBits = 16;
-    if (valueLength === bytes) {
-      unsignedBits = 8;
-    }
-    for (let i = 0; i < valueLength; i++) {
-      binary += createUnsignedBinaryString(value[i], unsignedBits);
-    }
-  }
-  else {
-    throw new Error('Object length does not match the floating point precision');
+  let unsignedLength = bits / signedLength;
+  for (let i = 0; i < signedLength; i++) {
+    binary += createUnsignedBinaryString(value[i], unsignedLength);
   }
   return binary;
 }
 
 function precisionToDecimal(value, bits, mantissa) {
-  let sign = null;
+  let bias = createBias(bits - mantissa - 1);
+  let sign = parseInt(value[i], 2);
   let exponent = '';
   let fraction = 0;
-  let bias = createBias(bits - mantissa - 1);
-  for (let i = 0; i < bits; i++) {
-    if (value[i] !== '0' && value[i] !== '1') {
-      throw new Error('Binary string is invalid');
-    }
-    if (i === 0) {
-      sign = parseInt(value[i], 2);
-    }
-    else if (i > 0 && i < (bits - mantissa)) {
-      exponent += value[i];
-    }
-    else if (i >= (bits - mantissa)) {
-      let bit = parseInt(value[i], 2);
-      let powerOfTwo = Math.pow(2, (-1 * (i - (bits - mantissa) + 1)));
-      fraction += bit * powerOfTwo;
-    }
+  for (let i = 1; i < (bits - mantissa); i++) {
+    exponent += value[i];
+  }
+  for (let i = (bits - mantissa); i < bits; i++) {
+    fraction += parseInt(value[i], 2) *
+                Math.pow(2, (-1 * (i - (bits - mantissa) + 1)));
   }
   exponent = parseInt(exponent, 2);
   if (exponent === 0 && fraction === 0) {
@@ -83,7 +64,7 @@ function precisionToDecimal(value, bits, mantissa) {
 }
 
 function decimalToPrecision(value, bits, mantissa) {
-  let sign = createSign(value) === 1 ? 0 : 1;
+  let sign = createSign(value);
   let bias = createBias(bits - mantissa - 1);
   value = Math.pow(-1, sign) * value;
   if (value < 1) {
@@ -101,7 +82,7 @@ function decimalToPrecision(value, bits, mantissa) {
     let fraction = '';
     for (let i = 0; i < mantissa; i++) {
       currentValue = currentValue * 2;
-      fraction += (parseInt(currentValue) >>> 0).toString();
+      fraction += (parseInt(currentValue) >>> 0).toString(2);
       if (currentValue > 1) {
         currentValue = currentValue - 1;
       }
@@ -133,7 +114,7 @@ function decimalToPrecision(value, bits, mantissa) {
     let fraction = '';
     for (let i = 0; i < mantissa; i++) {
       currentValue = currentValue * 2;
-      fraction += (parseInt(currentValue) >>> 0).toString();
+      fraction += (parseInt(currentValue) >>> 0).toString(2);
       if (currentValue > 1) {
         currentValue = currentValue - 1;
       }
