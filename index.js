@@ -64,6 +64,30 @@ function precisionToDecimal(value, bits, mantissa) {
 }
 
 function decimalToPrecision(value, bits, mantissa) {
+  if (value === 0) {
+    let zeroBinary = createSign(value).toString();
+    for (let i = 1; i < bits; i++) {
+      zeroBinary = zeroBinary + '0';
+    }
+    return zeroBinary;
+  }
+  if (value === Infinity || value === -Infinity) {
+    let infinityBinary = createSign(value).toString();
+    for (let i = 1; i < (bits - mantissa); i++) {
+      infinityBinary = infinityBinary + '1';
+    }
+    for (let i = (bits - mantissa); i < bits; i++) {
+      infinityBinary = infinityBinary + '0';
+    }
+    return infinityBinary;
+  }
+  if (isNaN(value)) {
+    let nanBinary = '0';
+    for (let i = 1; i < bits; i++) {
+      nanBinary = nanBinary + '1';
+    }
+    return nanBinary;
+  }
   let sign = createSign(value);
   let bias = createBias(bits - mantissa - 1);
   value = Math.pow(-1, sign) * value;
