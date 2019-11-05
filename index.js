@@ -35,6 +35,34 @@ function createBinaryString(value, bits, isLowEndian) {
   return binary;
 }
 
+function createBinaryFromFraction(value, mantissa, startFraction, round) {
+  let fraction = '';
+  for (let i = 0; i < mantissa; i++) {
+    value = value * 2;
+    fraction += parseInt((value) >>> 0).toString(2);
+    if (value > 1) {
+      value = value - 1;
+    }
+    if (value === startFraction || value === 1) {
+      if (round && (fraction[i] === '0' && value > 0.05)) {
+        fraction = fraction.slice(0, i - 1);
+        fraction += '1';
+      }
+      for (let j = 0; j < (mantissa - i); j++) {
+        fraction += '0';
+      }
+      break;
+    }
+    if (i === mantissa - 1) {
+      if (round && (fraction[i] === '0' && value > 0.05)) {
+        fraction = fraction.slice(0, i);
+        fraction += '1';
+      }
+    }
+  }
+  return fraction;
+}
+
 function precisionToDecimal(value, bits, mantissa) {
   let bias = createBias(bits - mantissa - 1);
   let sign = parseInt(value[0], 2);
@@ -88,71 +116,45 @@ function decimalToPrecision(value, bits, mantissa) {
     }
     return nanBinary;
   }
+  let isDenormal = false;
+  let round = true;
   let sign = createSign(value);
   let bias = createBias(bits - mantissa - 1);
   value = Math.pow(-1, sign) * value;
   if (value < 1) {
-    let counter = 0;
-    while (value < 1) {
-      counter++;
-      value = ((value / Math.pow(2, -1 * counter)) >= 1 &&
-              (value / Math.pow(2, -1 * counter)) < 2) ?
-              (value / Math.pow(2, -1 * counter)) : value;
+    let exponent = '';
+    if (value < Math.pow(2, (-1 * (bias - 1)))) {
+      isDenormal = true;
+      value = value / Math.pow(2, -126);
+      exponent = createUnsignedBinaryString(0, bits - mantissa - 1);
     }
-    let exponent = parseInt(-1 * counter + bias);
-    exponent = createUnsignedBinaryString(exponent, 8);
+    else {
+      let counter = 0;
+      while (value < 1) {
+        counter++;
+        let denominator = Math.pow(2, -1 * counter);
+        value = ((value / denominator) >= 1 && (value / denominator) < 2) ? (value / denominator) : value;
+      }
+      exponent = parseInt(-1 * counter + bias);
+      exponent = createUnsignedBinaryString(exponent, bits - mantissa - 1);
+    }
     let startFraction = value - parseInt(value);
     let currentValue = startFraction;
-    let fraction = '';
-    for (let i = 0; i < mantissa; i++) {
-      currentValue = currentValue * 2;
-      fraction += (parseInt(currentValue) >>> 0).toString(2);
-      if (currentValue > 1) {
-        currentValue = currentValue - 1;
-      }
-      if (currentValue === startFraction || currentValue === 1) {
-        if (fraction[i] === '0' && currentValue > 0.05) {
-          fraction = fraction.slice(0, i - 1);
-          fraction += '1';
-        }
-        for (let j = 0; j < (mantissa - i); j++) {
-          fraction += '0';
-        }
-        break;
-      }
-      if (i === mantissa - 1) {
-        if (fraction[i] === '0' && currentValue > 0.05) {
-          fraction = fraction.slice(0, i);
-          fraction += '1';
-        }
-      }
+    if (isDenormal) {
+      round = false;
     }
+    let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
     return sign + exponent + fraction;
   }
   else {
-    let integer = (parseInt(value) >>> 0).toString(2);
+    let integer = parseInt((value) >>> 0).toString(2);
     let exponent = parseInt(integer.length - 1 + bias);
-    exponent = createUnsignedBinaryString(exponent, 8);
+    exponent = createUnsignedBinaryString(exponent, bits - mantissa - 1);
     let startFraction = value - parseInt(value);
     let currentValue = startFraction;
-    let fraction = '';
-    for (let i = 0; i < mantissa; i++) {
-      currentValue = currentValue * 2;
-      fraction += (parseInt(currentValue) >>> 0).toString(2);
-      if (currentValue > 1) {
-        currentValue = currentValue - 1;
-      }
-      if (currentValue === startFraction || currentValue === 1) {
-        if (fraction[i] === '0' && currentValue > 0.05) {
-          fraction[i] = '1';
-        }
-        for (let j = 0; j < (mantissa - i); j++) {
-          fraction += '0';
-        }
-        break;
-      }
-    }
-    fraction = (integer + fraction).slice(1, 24);
+    let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
+
+    fraction = (integer + fraction).slice(1, mantissa + 1);
     return sign + exponent + fraction;
   }
 }
