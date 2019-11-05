@@ -72,8 +72,7 @@ function precisionToDecimal(value, bits, mantissa) {
     exponent += value[i];
   }
   for (let i = (bits - mantissa); i < bits; i++) {
-    fraction += parseInt(value[i], 2) *
-                Math.pow(2, (-1 * (i - (bits - mantissa) + 1)));
+    fraction += parseInt(value[i], 2) * Math.pow(2, (-1 * (i - (bits - mantissa) + 1)));
   }
   exponent = parseInt(exponent, 2);
   if (exponent === 0 && fraction === 0) {
