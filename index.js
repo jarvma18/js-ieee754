@@ -11,26 +11,26 @@ function createSign(value) {
   return value ? value < 0 ? 1 : 0 : 0;
 }
 
-function createUnsignedBinaryString(value, unsignedLength) {
+function createUnsignedBinaryString(value, unsigned) {
   let binary = (value >>> 0).toString(2);
-  for (let i = binary.length; i < unsignedLength; i++) {
+  for (let i = binary.length; i < unsigned; i++) {
     binary = '0' + binary;
   }
   return binary;
 }
 
 function createBinaryString(value, bits, isLowEndian) {
-  let signedLength = value.length;
+  let signed = value.length;
   let binary = '';
-  if (!signedLength) {
+  if (!signed) {
     throw new Error('Object has no length');
   }
   if (value && isLowEndian) {
     value.reverse();
   }
-  let unsignedLength = bits / signedLength;
-  for (let i = 0; i < signedLength; i++) {
-    binary += createUnsignedBinaryString(value[i], unsignedLength);
+  let unsigned = bits / signed;
+  for (let i = 0; i < signed; i++) {
+    binary += createUnsignedBinaryString(value[i], unsigned);
   }
   return binary;
 }
@@ -63,9 +63,32 @@ function createBinaryFromFraction(value, mantissa, startFraction, round) {
   return fraction;
 }
 
+function createInt(value, bits, isLittleEndian) {
+  let array = [];
+  if (isLittleEndian) {
+    for (let i = (value.length / bits) - 1; i < 0; i--) {
+      let binary = '';
+      for (let j = ((i + 1) * bits - 1); j < i * bits; j--) {
+        binary += value[j];
+      }
+      array.push(parseInt(binary, 2));
+    }
+  }
+  else {
+    for (let i = 0; i < (value.length / bits); i++) {
+      let binary = '';
+      for (let j = i * bits; j < ((i + 1) * bits); j++) {
+        binary += value[j];
+      }
+      array.push(parseInt(binary, 2));
+    }
+  }
+}
+
 function precisionToDecimal(value, bits, mantissa) {
   let bias = createBias(bits - mantissa - 1);
   let sign = parseInt(value[0], 2);
+  let maxExponent = Math.pow(2, (bits - mantissa - 1)) - 1;
   let exponent = '';
   let fraction = 0;
   for (let i = 1; i < (bits - mantissa); i++) {
@@ -78,14 +101,14 @@ function precisionToDecimal(value, bits, mantissa) {
   if (exponent === 0 && fraction === 0) {
     return Math.pow(-1, sign) * 0.0;
   }
-  if (exponent === 255 && fraction === 0) {
+  if (exponent === maxExponent && fraction === 0) {
     return Math.pow(-1, sign) * Infinity;
   }
-  if (exponent === 255 && fraction !== 0) {
+  if (exponent === maxExponent && fraction !== 0) {
     return NaN;
   }
   if (exponent === 0) {
-    return Math.pow(-1, sign) * (fraction) * Math.pow(2, -126);
+    return Math.pow(-1, sign) * (fraction) * Math.pow(2, (-1 * (bias - 1)));
   }
   return Math.pow(-1, sign) * (1 + fraction) * Math.pow(2, (exponent - bias));
 }
@@ -124,7 +147,7 @@ function decimalToPrecision(value, bits, mantissa) {
     let exponent = '';
     if (value < Math.pow(2, (-1 * (bias - 1)))) {
       isDenormal = true;
-      value = value / Math.pow(2, -126);
+      value = value / Math.pow(2, (-1 * (bias - 1)));
       exponent = createUnsignedBinaryString(0, bits - mantissa - 1);
     }
     else {
@@ -158,45 +181,61 @@ function decimalToPrecision(value, bits, mantissa) {
   }
 }
 
-exports.halfToDecimal = function halfToDecimal() {
-
-};
-exports.decimalToHalf = function decimalToHalf() {
-
-};
-
-exports.singleToDecimal = function singleToDecimal(value, isLowEndian) {
-  let binaryString = value;
+exports.getDecimal = function getDecimal(value, options) {
+  let bits = 32;
+  let mantissa = 23;
+  if (options && options.mode === 'half') {
+    bits = 16;
+    mantissa = 10;
+  }
+  else if (options && options.mode === 'single') {
+    bits = 32;
+    mantissa = 23;
+  }
+  else if (options && options.mode === 'double') {
+    bits = 64;
+    mantissa = 52;
+  }
   if (!value.length) {
     throw new Error('Object must have length and be the type of array or string');
   }
   if (typeof value === 'object') {
     try {
-      binaryString = createBinaryString(value, 32, isLowEndian);
+      value = createBinaryString(value, bits, options ? options.isLittleEndian : null);
     }
     catch(error) {
       console.log(error);
     }
   }
   try {
-    return precisionToDecimal(binaryString, 32, 23)
+    return precisionToDecimal(value, bits, mantissa);
   }
   catch(error) {
     console.log(error);
   }
 };
 
-exports.decimalToSingle = function decimalToSingle(value, isLowEndian, returnType) {
-  return decimalToPrecision(value, 32, 23);
-};
+exports.getPrecision = function getPrecision(value, options) {
+  let bits = 32;
+  let mantissa = 23;
+  if (options && options.mode === 'half') {
+    bits = 16;
+    mantissa = 10;
+  }
+  else if (options && options.mode === 'single') {
+    bits = 32;
+    mantissa = 23;
+  }
+  else if (options && options.mode === 'double') {
+    bits = 64;
+    mantissa = 52;
+  }
+  let precision = decimalToPrecision(value, bits, mantissa);
+  if (options && options.returnType === '16bitArray') {
 
-exports.doubleToDecimal = function doubleToDecimal() {
+  }
+  else if (options && options.returnType === '8bitArray') {
 
-};
-exports.decimalToDouble = function decimalToDouble() {
-
-};
-
-exports.doublePrecision = function doublePrecision() {
-
+  }
+  return precision;
 };
