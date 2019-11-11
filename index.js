@@ -65,24 +65,17 @@ function createBinaryFromFraction(value, mantissa, startFraction, round) {
 
 function createInt(value, bits, isLittleEndian) {
   let array = [];
+  for (let i = 0; i < (value.length / bits); i++) {
+    let binary = '';
+    for (let j = i * bits; j < ((i + 1) * bits); j++) {
+      binary += value[j];
+    }
+    array.push(parseInt(binary, 2));
+  }
   if (isLittleEndian) {
-    for (let i = (value.length / bits) - 1; i < 0; i--) {
-      let binary = '';
-      for (let j = ((i + 1) * bits - 1); j < i * bits; j--) {
-        binary += value[j];
-      }
-      array.push(parseInt(binary, 2));
-    }
+    return array.reverse();
   }
-  else {
-    for (let i = 0; i < (value.length / bits); i++) {
-      let binary = '';
-      for (let j = i * bits; j < ((i + 1) * bits); j++) {
-        binary += value[j];
-      }
-      array.push(parseInt(binary, 2));
-    }
-  }
+  return array;
 }
 
 function precisionToDecimal(value, bits, mantissa) {
@@ -117,24 +110,24 @@ function decimalToPrecision(value, bits, mantissa) {
   if (value === 0) {
     let zeroBinary = createSign(value).toString();
     for (let i = 1; i < bits; i++) {
-      zeroBinary = zeroBinary + '0';
+      zeroBinary += '0';
     }
     return zeroBinary;
   }
   if (value === Infinity || value === -Infinity) {
     let infinityBinary = createSign(value).toString();
     for (let i = 1; i < (bits - mantissa); i++) {
-      infinityBinary = infinityBinary + '1';
+      infinityBinary += '1';
     }
     for (let i = (bits - mantissa); i < bits; i++) {
-      infinityBinary = infinityBinary + '0';
+      infinityBinary += '0';
     }
     return infinityBinary;
   }
   if (isNaN(value)) {
     let nanBinary = '0';
     for (let i = 1; i < bits; i++) {
-      nanBinary = nanBinary + '1';
+      nanBinary += '1';
     }
     return nanBinary;
   }
@@ -142,12 +135,13 @@ function decimalToPrecision(value, bits, mantissa) {
   let round = true;
   let sign = createSign(value);
   let bias = createBias(bits - mantissa - 1);
+  let minExponent = Math.pow(2, (-1 * (bias - 1)));
   value = Math.pow(-1, sign) * value;
   if (value < 1) {
     let exponent = '';
-    if (value < Math.pow(2, (-1 * (bias - 1)))) {
+    if (value < minExponent) {
       isDenormal = true;
-      value = value / Math.pow(2, (-1 * (bias - 1)));
+      value = value / minExponent;
       exponent = createUnsignedBinaryString(0, bits - mantissa - 1);
     }
     else {
@@ -232,10 +226,10 @@ exports.getPrecision = function getPrecision(value, options) {
   }
   let precision = decimalToPrecision(value, bits, mantissa);
   if (options && options.returnType === '16bitArray') {
-
+    return createInt(precision, 16, options.isLittleEndian);
   }
   else if (options && options.returnType === '8bitArray') {
-
+    return createInt(precision, 8, options.isLittleEndian);
   }
   return precision;
 };
