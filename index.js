@@ -19,14 +19,11 @@ function createUnsignedBinaryString(value, unsigned) {
   return binary;
 }
 
-function createBinaryString(value, bits, isLowEndian) {
+function createBinaryString(value, bits) {
   let signed = value.length;
   let binary = '';
   if (!signed) {
     throw new Error('Object has no length');
-  }
-  if (value && isLowEndian) {
-    value.reverse();
   }
   let unsigned = bits / signed;
   for (let i = 0; i < signed; i++) {
@@ -63,7 +60,7 @@ function createBinaryFromFraction(value, mantissa, startFraction, round) {
   return fraction;
 }
 
-function createInt(value, bits, isLittleEndian) {
+function createInt(value, bits) {
   let array = [];
   for (let i = 0; i < (value.length / bits); i++) {
     let binary = '';
@@ -71,9 +68,6 @@ function createInt(value, bits, isLittleEndian) {
       binary += value[j];
     }
     array.push(parseInt(binary, 2));
-  }
-  if (isLittleEndian) {
-    return array.reverse();
   }
   return array;
 }
@@ -195,7 +189,7 @@ exports.getDecimal = function getDecimal(value, options) {
   }
   if (typeof value === 'object') {
     try {
-      value = createBinaryString(value, bits, options ? options.isLittleEndian : null);
+      value = createBinaryString(value, bits);
     }
     catch(error) {
       console.log(error);
@@ -226,10 +220,10 @@ exports.getPrecision = function getPrecision(value, options) {
   }
   let precision = decimalToPrecision(value, bits, mantissa);
   if (options && options.returnType === '16bitArray') {
-    return createInt(precision, 16, options.isLittleEndian);
+    return createInt(precision, 16);
   }
   else if (options && options.returnType === '8bitArray') {
-    return createInt(precision, 8, options.isLittleEndian);
+    return createInt(precision, 8);
   }
   return precision;
 };
