@@ -5,6 +5,9 @@ Javascript library to convert ieee-754 values to decimal format and vice versa. 
   - More converting options
   - Testing of conversion (with half, single and double precision)
   - Testing the options
+  - Error handling for
+    - Value overflow
+    - Value underflow
 
 ## Usage
 
