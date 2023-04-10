@@ -1,6 +1,7 @@
 # IEEE754 for Javascript
 Javascript library to convert ieee-754 values to decimal format and vice versa.
-To do:
+
+## To do:
 
 * Code refactoring/optimizing
 * Underflow
