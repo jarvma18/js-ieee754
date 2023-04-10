@@ -30,5 +30,14 @@ console.log(ieee754.getPrecision(0, optionsWithReturnType));
 // --> [0, 0]
 console.log(ieee754.getPrecision(0, optionsWithoutReturnType));
 // --> 00000000000000000000000000000000
+```
 
+## How to use test with Jest
+### Install Jest to project
+```
+npm install
+```
+### Run tests
+```
+npm test
 ```
