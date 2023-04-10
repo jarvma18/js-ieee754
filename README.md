@@ -13,12 +13,14 @@ To do:
 ## How to use
 ```javascript
 const ieee754 = require(./ieee754);
+const optionsWithReturnType = {mode: 'single', returnType: '16bitArray'};
+const optionsWithoutReturnType = {mode: 'single'};
 
 console.log(ieee754.getDecimal([17530, 8192]); // 1000.5
-console.log(ieee754.getPrecision(1000.5, {mode: 'single', returnType: '16bitArray'})) // [17530, 8192]
-console.log(ieee754.getPrecision(1000.5, {mode: 'single'})) // 01000100011110100010000000000000
+console.log(ieee754.getPrecision(1000.5, optionsWithReturnType)) // [17530, 8192]
+console.log(ieee754.getPrecision(1000.5, optionsWithoutReturnType)) // 01000100011110100010000000000000
 console.log(ieee754.getDecimal([0, 0]); // 0
-console.log(ieee754.getPrecision(0, {mode: 'single', returnType: '16bitArray'})) // [0, 0]
-console.log(ieee754.getPrecision(0, {mode: 'single'})) // 00000000000000000000000000000000
+console.log(ieee754.getPrecision(0, optionsWithReturnType)) // [0, 0]
+console.log(ieee754.getPrecision(0, optionsWithoutReturnType)) // 00000000000000000000000000000000
 
 ```
