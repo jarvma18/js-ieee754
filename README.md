@@ -18,6 +18,7 @@ const ieee754 = require(./ieee754);
 const optionsWithReturnType = {mode: 'single', returnType: '16bitArray'};
 const optionsWithoutReturnType = {mode: 'single'};
 
+// Examples
 console.log(ieee754.getDecimal([17530, 8192]);
 // --> 1000.5
 console.log(ieee754.getPrecision(1000.5, optionsWithReturnType));
