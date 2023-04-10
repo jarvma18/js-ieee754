@@ -1,5 +1,5 @@
 # IEEE754 for Javascript
-Javascript library to convert ieee-754 values to decimal format and vice versa.
+Javascript library to convert values to decimal format and vice versa with IEEE754 standard.
 
 ## To do:
 
