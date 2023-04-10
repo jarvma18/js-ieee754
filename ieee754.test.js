@@ -202,5 +202,3 @@ test('get single precision from -0 to be 10000000000000000000000000000000', () =
 test('get double precision from -0 to be 1000000000000000000000000000000000000000000000000000000000000000', () => {
   expect(ieee754.getPrecision(-0, {mode: 'double'})).toBe('1000000000000000000000000000000000000000000000000000000000000000');
 });
-
-// Test to input wrong type with chosen mode (32 binary to half precision etc)
