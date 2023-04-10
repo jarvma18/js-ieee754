@@ -1,4 +1,4 @@
-const index = require('./index');
+const index = require('./ieee754');
 
 // Testing get decimal method
 test('get half precision decimal from [25553] to be 1000.5', () => {
