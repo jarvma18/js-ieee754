@@ -1,0 +1,25 @@
+{
+  "name": "js-ieee754",
+  "version": "1.0.0",
+  "description": "Javascript library to convert data with IEEE754 standard.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jarvma18/js-ieee754.git"
+  },
+  "keywords": [
+    "IEEE754"
+  ],
+  "author": "Markus Järvinen",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/jarvma18/js-ieee754/issues"
+  },
+  "homepage": "https://github.com/jarvma18/js-ieee754#readme",
+  "devDependencies": {
+    "jest": "^29.5.0"
+  }
+}
