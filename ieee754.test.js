@@ -135,13 +135,13 @@ test('get single precision from -Infinity to be [255, 128, 0, 0]', () => {
 test('get double precision from -Infinity to be [255, 240, 0, 0, 0, 0, 0, 0]', () => {
   expect(ieee754.getPrecision(-Infinity, {mode: 'double', returnType: '8bitArray'})).toStrictEqual([255, 240, 0, 0, 0, 0, 0, 0]);
 });
-test('get half precision from -Infinity to be 1111111111111111', () => {
+test('get half precision from -Infinity to be 1111110000000000', () => {
   expect(ieee754.getPrecision(-Infinity, {mode: 'half'})).toBe('1111110000000000');
 });
-test('get single precision from -Infinity to be 11111111111111111111111111111111', () => {
+test('get single precision from -Infinity to be 11111111100000000000000000000000', () => {
   expect(ieee754.getPrecision(-Infinity, {mode: 'single'})).toBe('11111111100000000000000000000000');
 });
-test('get double precision from -Infinity to be 1111111111111111111111111111111111111111111111111111111111111111', () => {
+test('get double precision from -Infinity to be 1111111111110000000000000000000000000000000000000000000000000000', () => {
   expect(ieee754.getPrecision(-Infinity, {mode: 'double'})).toBe('1111111111110000000000000000000000000000000000000000000000000000');
 });
 
@@ -201,4 +201,24 @@ test('get single precision from -0 to be 10000000000000000000000000000000', () =
 });
 test('get double precision from -0 to be 1000000000000000000000000000000000000000000000000000000000000000', () => {
   expect(ieee754.getPrecision(-0, {mode: 'double'})).toBe('1000000000000000000000000000000000000000000000000000000000000000');
+});
+
+// Testing to get precision for values under 1
+test('get half precision from 0.1 to be 0010111001100111', () => {
+  expect(ieee754.getPrecision(0.1, {mode: 'half'})).toBe('0010111001100111');
+});
+test('get single precision from 0.1 to be 00111101110011001100110011001101', () => {
+  expect(ieee754.getPrecision(0.1, {mode: 'single'})).toBe('00111101110011001100110011001101');
+});
+test('get double precision from 0.1 to be 0011111110111001100110011001100110011001100110011001100110011010', () => {
+  expect(ieee754.getPrecision(0.1, {mode: 'double'})).toBe('0011111110111001100110011001100110011001100110011001100110011010');
+});
+test('get double precision from 0.5 to be 0011111111100000000000000000000000000000000000000000000000000000', () => {
+  expect(ieee754.getPrecision(0.5, {mode: 'double'})).toBe('0011111111100000000000000000000000000000000000000000000000000000');
+});
+test('get double precision from 0.9 to be 0011111111101100110011001100110011001100110011001100110011001101', () => {
+  expect(ieee754.getPrecision(0.9, {mode: 'double'})).toBe('0011111111101100110011001100110011001100110011001100110011001101');
+});
+test('get double precision from 1.1 to be 0011111111110001100110011001100110011001100110011001100110011010', () => {
+  expect(ieee754.getPrecision(1.1, {mode: 'double'})).toBe('0011111111110001100110011001100110011001100110011001100110011010');
 });
