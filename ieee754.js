@@ -22,9 +22,6 @@ function createUnsignedBinaryString(value, unsigned) {
 function createBinaryString(value, bits) {
   let signed = value.length;
   let binary = '';
-  if (!signed) {
-    throw new Error('Object has no length');
-  }
   let unsigned = bits / signed;
   for (let i = 0; i < signed; i++) {
     binary += createUnsignedBinaryString(value[i], unsigned);
@@ -100,30 +97,39 @@ function precisionToDecimal(value, bits, mantissa) {
   return Math.pow(-1, sign) * (1 + fraction) * Math.pow(2, (exponent - bias));
 }
 
-function decimalToPrecision(value, bits, mantissa) {
+function checkAndBuildSpecials(value, bits) {
   if (value === 0) {
-    let zeroBinary = createSign(value).toString();
-    for (let i = 1; i < bits; i++) {
-      zeroBinary += '0';
-    }
-    return zeroBinary;
+    const zeroIndex = createSign(value).toString();
+    if (bits === 16) { return zeroIndex + '000000000000000'; }
+    if (bits === 32) { return zeroIndex + '0000000000000000000000000000000'; }
+    if (bits === 64) { return zeroIndex + '000000000000000000000000000000000000000000000000000000000000000'; }
   }
-  if (value === Infinity || value === -Infinity) {
-    let infinityBinary = createSign(value).toString();
-    for (let i = 1; i < (bits - mantissa); i++) {
-      infinityBinary += '1';
-    }
-    for (let i = (bits - mantissa); i < bits; i++) {
-      infinityBinary += '0';
-    }
-    return infinityBinary;
+  else if (value === Infinity) {
+    if (bits === 16) { return '0111110000000000'; }
+    if (bits === 32) { return '01111111100000000000000000000000'; }
+    if (bits === 64) { return '0111111111110000000000000000000000000000000000000000000000000000'; }
   }
-  if (isNaN(value)) {
-    let nanBinary = '0';
-    for (let i = 1; i < bits; i++) {
-      nanBinary += '1';
-    }
-    return nanBinary;
+  else if (value === -Infinity) {
+    if (bits === 16) { return '1111110000000000'; }
+    if (bits === 32) { return '11111111100000000000000000000000'; }
+    if (bits === 64) { return '1111111111110000000000000000000000000000000000000000000000000000'; }
+  }
+  else if (isNaN(value)) {
+    if (bits === 16) { return '0111111111111111'; }
+    if (bits === 32) { return '01111111111111111111111111111111'; }
+    if (bits === 64) { return '0111111111111111111111111111111111111111111111111111111111111111'; }
+  }
+  else {
+    return null;
+  }
+}
+
+// function buildPrecisionForUnderOneValues
+
+function decimalToPrecision(value, bits, mantissa) {
+  const specialValue = checkAndBuildSpecials(value, bits);
+  if (specialValue) {
+    return specialValue;
   }
   let isDenormal = false;
   let round = true;
@@ -163,67 +169,89 @@ function decimalToPrecision(value, bits, mantissa) {
     let startFraction = value - parseInt(value);
     let currentValue = startFraction;
     let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
-
     fraction = (integer + fraction).slice(1, mantissa + 1);
     return sign + exponent + fraction;
   }
 }
 
-exports.getDecimal = function getDecimal(value, options) {
-  let bits = 32;
-  let mantissa = 23;
-  if (options && options.mode === 'half') {
-    bits = 16;
-    mantissa = 10;
-  }
-  else if (options && options.mode === 'single') {
-    bits = 32;
-    mantissa = 23;
-  }
-  else if (options && options.mode === 'double') {
-    bits = 64;
-    mantissa = 52;
+function setDefaultBitsForPrecision(precision) {
+  if (precision === 'half') { return 16; }
+  if (precision === 'single') { return 32; }
+  if (precision === 'double') { return 64; }
+  return 16;
+}
+
+function setDefaultMantissaForPrecision(precision) {
+  if (precision === 'half') { return 10; }
+  if (precision === 'single') { return 23; }
+  if (precision === 'double') { return 52; }
+  return 10;
+}
+
+function checkValueForDecimalConversion(value) {
+  if (!value) {
+    throw new Error('Value must be defined');
   }
   if (!value.length) {
-    throw new Error('Object must have length and be the type of array or string');
+    throw new Error('Value must have length');
   }
-  if (typeof value === 'object') {
-    try {
+  if (typeof value !== 'object' && typeof value !== 'string') {
+    throw new Error('Value must be the type of array or string');
+  }
+}
+
+function checkValueForPrecisionConversion(value) {
+  if (!value && value !== 0 && !isNaN(value)) {
+    throw new Error('Value must be defined');
+  }
+  if (typeof value !== 'number') {
+    throw new Error('Value must be the type of number');
+  }
+}
+
+function checkOptions(options) {
+  const mode = options.mode;
+  const returnType = options.returnType;
+  if (mode !== 'half' && mode !== 'single' && mode !== 'double') {
+    throw new Error('Mode option must be either half, single or double');
+  }
+  if (returnType && returnType !== '8bitArray' && returnType !== '16bitArray') {
+    throw new Error('Returntype option must either undefined, 8bitArray or 16bitArray');
+  }
+}
+
+exports.getDecimal = function getDecimal(value, options) {
+  try {
+    checkValueForDecimalConversion(value);
+    checkOptions(options);
+    const bits = setDefaultBitsForPrecision(options.mode);
+    const mantissa = setDefaultMantissaForPrecision(options.mode);
+    if (typeof value === 'object') {
       value = createBinaryString(value, bits);
     }
-    catch(error) {
-      console.log(error);
-    }
-  }
-  try {
     return precisionToDecimal(value, bits, mantissa);
   }
-  catch(error) {
-    console.log(error);
+  catch(err) {
+    console.log(err);
   }
 };
 
 exports.getPrecision = function getPrecision(value, options) {
-  let bits = 32;
-  let mantissa = 23;
-  if (options && options.mode === 'half') {
-    bits = 16;
-    mantissa = 10;
+  try {
+    checkValueForPrecisionConversion(value);
+    checkOptions(options);
+    const bits = setDefaultBitsForPrecision(options.mode);
+    const mantissa = setDefaultMantissaForPrecision(options.mode);
+    let precision = decimalToPrecision(value, bits, mantissa);
+    if (options && options.returnType === '16bitArray') {
+      return createInt(precision, 16);
+    }
+    else if (options && options.returnType === '8bitArray') {
+      return createInt(precision, 8);
+    }
+    return precision;
   }
-  else if (options && options.mode === 'single') {
-    bits = 32;
-    mantissa = 23;
+  catch(err) {
+    console.log(err);
   }
-  else if (options && options.mode === 'double') {
-    bits = 64;
-    mantissa = 52;
-  }
-  let precision = decimalToPrecision(value, bits, mantissa);
-  if (options && options.returnType === '16bitArray') {
-    return createInt(precision, 16);
-  }
-  else if (options && options.returnType === '8bitArray') {
-    return createInt(precision, 8);
-  }
-  return precision;
 };
