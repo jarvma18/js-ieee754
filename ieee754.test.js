@@ -204,11 +204,21 @@ test('get double precision from -0 to be 100000000000000000000000000000000000000
 });
 
 // Testing to get precision for values under 1
+// these might be wrong, 0.3 conversion might be wrong
 test('get half precision from 0.1 to be 0010111001100111', () => {
   expect(ieee754.getPrecision(0.1, {mode: 'half'})).toBe('0010111001100111');
 });
+test('get half precision from 0.2 to be 0011001001100111', () => {
+  expect(ieee754.getPrecision(0.2, {mode: 'half'})).toBe('0011001001100111');
+});
+test('get half precision decimal from 0011001001100111 to be 0.2000732421875', () => {
+  expect(ieee754.getDecimal('0011001001100111', {mode: 'half'})).toBe(0.2000732421875);
+});
 test('get single precision from 0.1 to be 00111101110011001100110011001101', () => {
   expect(ieee754.getPrecision(0.1, {mode: 'single'})).toBe('00111101110011001100110011001101');
+});
+test('get single precision from 0.3 to be 00111110100110011001100110011001', () => {
+  expect(ieee754.getPrecision(0.3, {mode: 'single'})).toBe('00111110100110011001100110011001');
 });
 test('get double precision from 0.1 to be 0011111110111001100110011001100110011001100110011001100110011010', () => {
   expect(ieee754.getPrecision(0.1, {mode: 'double'})).toBe('0011111110111001100110011001100110011001100110011001100110011010');

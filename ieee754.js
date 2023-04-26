@@ -42,7 +42,7 @@ function createBinaryFromFraction(value, mantissa, startFraction, round) {
         fraction = fraction.slice(0, i - 1);
         fraction += '1';
       }
-      for (let j = 0; j < (mantissa - i); j++) {
+      for (let j = 0; j < (mantissa - 1 - i); j++) {
         fraction += '0';
       }
       break;

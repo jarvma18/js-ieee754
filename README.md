@@ -4,6 +4,8 @@ Javascript library to convert values to decimal format and vice versa with IEEE7
 ## To do:
 
 * Code refactoring/optimizing
+* Rounding
+* Values under 1
 * Underflow
 * Overflow
 * Handling the rounding errors
