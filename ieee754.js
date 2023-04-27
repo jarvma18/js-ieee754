@@ -124,21 +124,12 @@ function checkAndBuildSpecials(value, bits) {
   }
 }
 
-// function buildPrecisionForUnderOneValues
+function calculateDenominator(counter) {
+  return Math.pow(2, -1 * counter);
+}
 
-function decimalToPrecision(value, bits, mantissa) {
-  const specialValue = checkAndBuildSpecials(value, bits);
-  if (specialValue) {
-    return specialValue;
-  }
-  let isDenormal = false;
-  let round = true;
-  let sign = createSign(value);
-  let bias = createBias(bits - mantissa - 1);
-  let minExponent = Math.pow(2, (-1 * (bias - 1)));
-  value = Math.pow(-1, sign) * value;
-  if (value < 1) {
-    let exponent = '';
+function buildPrecisionForUnderOneValues(bits, mantissa, isDenormal, round, sign, bias, minExponent, value) {
+  let exponent = '';
     if (value < minExponent) {
       isDenormal = true;
       value = value / minExponent;
@@ -148,7 +139,7 @@ function decimalToPrecision(value, bits, mantissa) {
       let counter = 0;
       while (value < 1) {
         counter++;
-        let denominator = Math.pow(2, -1 * counter);
+        let denominator = calculateDenominator(counter);
         value = ((value / denominator) >= 1 && (value / denominator) < 2) ? (value / denominator) : value;
       }
       exponent = parseInt(-1 * counter + bias);
@@ -161,16 +152,43 @@ function decimalToPrecision(value, bits, mantissa) {
     }
     let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
     return sign + exponent + fraction;
+}
+
+function buildPrecisionForOverOneValues(bits, mantissa, round, sign, bias, value) {
+  let integer = parseInt((value) >>> 0).toString(2);
+  let exponent = parseInt(integer.length - 1 + bias);
+  exponent = createUnsignedBinaryString(exponent, bits - mantissa - 1);
+  let startFraction = value - parseInt(value);
+  let currentValue = startFraction;
+  let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
+  fraction = (integer + fraction).slice(1, mantissa + 1);
+  return sign + exponent + fraction;
+}
+
+function calculateMinExponent(bias) {
+  return Math.pow(2, (-1 * (bias - 1)));
+}
+
+function calculateValueWithSign(sign, value) {
+  return Math.pow(-1, sign) * value;
+}
+
+function decimalToPrecision(value, bits, mantissa) {
+  const specialValue = checkAndBuildSpecials(value, bits);
+  if (specialValue) {
+    return specialValue;
+  }
+  let isDenormal = false;
+  let round = true;
+  let sign = createSign(value);
+  let bias = createBias(bits - mantissa - 1);
+  let minExponent = calculateMinExponent(bias);
+  value = calculateValueWithSign(sign, value);
+  if (value < 1) {
+    return buildPrecisionForUnderOneValues(bits, mantissa, isDenormal, round, sign, bias, minExponent, value);
   }
   else {
-    let integer = parseInt((value) >>> 0).toString(2);
-    let exponent = parseInt(integer.length - 1 + bias);
-    exponent = createUnsignedBinaryString(exponent, bits - mantissa - 1);
-    let startFraction = value - parseInt(value);
-    let currentValue = startFraction;
-    let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
-    fraction = (integer + fraction).slice(1, mantissa + 1);
-    return sign + exponent + fraction;
+    return buildPrecisionForOverOneValues(bits, mantissa, round, sign, bias, value);
   }
 }
 
