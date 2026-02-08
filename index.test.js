@@ -1,4 +1,4 @@
-const ieee754 = require('./ieee754');
+const ieee754 = require('.');
 
 // Testing get decimal method
 test('get half precision decimal from [25553] to be 1000.5', () => {
