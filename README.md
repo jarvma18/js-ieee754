@@ -69,7 +69,7 @@ npm test
   - `src/shared.js` — utilities (bias, binary formatting)
   - `src/validation.js` — simple argument validation
 
-## Roadmap / TODO
+## TODO
 
 Short, actionable items:
 
