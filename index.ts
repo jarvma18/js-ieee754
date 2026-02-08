@@ -15,7 +15,7 @@ type GetDecimalOptions = {
   mode: PrecisionMode;
 };
 
-function createBinaryString(value: number[], bits: number): string {
+function createBinaryString(value: Uint8Array | Uint16Array, bits: number): string {
   let signed = value.length;
   let binary = '';
   let unsigned = bits / signed;
@@ -25,16 +25,20 @@ function createBinaryString(value: number[], bits: number): string {
   return binary;
 }
 
-function createInt(value: string, bits: number): number[] {
-  let array: number[] = [];
+function createInt(value: string, bits: number): Uint8Array | Uint16Array {
+  const tempArray: number[] = [];
   for (let i = 0; i < (value.length / bits); i++) {
     let binary = '';
     for (let j = i * bits; j < ((i + 1) * bits); j++) {
       binary += value[j];
     }
-    array.push(parseInt(binary, 2));
+    tempArray.push(parseInt(binary, 2));
   }
-  return array;
+  if (bits === 8) {
+    return new Uint8Array(tempArray);
+  } else {
+    return new Uint16Array(tempArray);
+  }
 }
 
 function setDefaultBitsForPrecision(precision: PrecisionMode): number {
@@ -51,7 +55,7 @@ function setDefaultMantissaForPrecision(precision: PrecisionMode): number {
   return 10;
 }
 
-function precisionToType(precision: string, options?: GetPrecisionOptions): string | number[] {
+function precisionToType(precision: string, options?: GetPrecisionOptions): string | Uint8Array | Uint16Array {
   if (options && options.returnType === '16bitArray') {
     return createInt(precision, 16);
   }
@@ -63,7 +67,7 @@ function precisionToType(precision: string, options?: GetPrecisionOptions): stri
   }
 }
 
-export function getDecimal(value: string | number[], options: GetDecimalOptions): number | undefined {
+export function getDecimal(value: string | Uint8Array | Uint16Array, options: GetDecimalOptions): number | undefined {
   try {
     validation.validate('precisionDecimal', value, options);
     const bits = setDefaultBitsForPrecision(options.mode);
@@ -76,7 +80,7 @@ export function getDecimal(value: string | number[], options: GetDecimalOptions)
   }
 }
 
-export function getPrecision(value: number, options: GetPrecisionOptions): string | number[] | undefined {
+export function getPrecision(value: number, options: GetPrecisionOptions): string | Uint8Array | Uint16Array | undefined {
   try {
     validation.validate('decimalPrecision', value, options);
     const bits = setDefaultBitsForPrecision(options.mode);
