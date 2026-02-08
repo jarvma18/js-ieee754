@@ -2,7 +2,8 @@
   "name": "js-ieee754",
   "version": "1.0.0",
   "description": "Library to convert between numbers and IEEE754 binary representations (half/single/double precision).",
-  "main": "index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
   "scripts": {
     "test": "jest",
     "build": "tsc"
