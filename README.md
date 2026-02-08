@@ -1,47 +1,78 @@
-# IEEE754 for Javascript
-Javascript library to convert values to decimal format and vice versa with IEEE754 standard.
+# js-ieee754
 
-## To do:
+Lightweight JavaScript helpers to convert between JS numbers and IEEE‑754 binary representations (half/single/double precision).
 
-* Code refactoring/optimizing
-* Rounding
-* Values under 1
-* Underflow
-* Overflow
-* Handling the rounding errors
-* Error catching
-* Catching wrong inputs
-* Some additional test with jest
-* Add default value if no options are passed
-* Add error handling if no value is passed
+This repo provides two main functions exposed from `index.js`:
 
-## How to use
-```javascript
-const ieee754 = require(./ieee754);
-const optionsWithReturnType = {mode: 'single', returnType: '16bitArray'};
-const optionsWithoutReturnType = {mode: 'single'};
+- `getPrecision(number, options)` — convert a JavaScript `number` into an IEEE‑754 representation.
+- `getDecimal(value, options)` — convert an IEEE‑754 representation (binary string or integer array) back to a JS `number`.
 
-// Examples
-console.log(ieee754.getDecimal([17530, 8192]);
-// --> 1000.5
-console.log(ieee754.getPrecision(1000.5, optionsWithReturnType));
-// --> [17530, 8192]
-console.log(ieee754.getPrecision(1000.5, optionsWithoutReturnType));
-// --> 01000100011110100010000000000000
-console.log(ieee754.getDecimal([0, 0]);
-// --> 0
-console.log(ieee754.getPrecision(0, optionsWithReturnType));
-// --> [0, 0]
-console.log(ieee754.getPrecision(0, optionsWithoutReturnType));
-// --> 00000000000000000000000000000000
-```
+Quick highlights
+- Supports `half` (16‑bit), `single` (32‑bit) and `double` (64‑bit) modes.
+- Output can be a binary string, an array of 16‑bit integers (`16bitArray`) or an array of 8‑bit bytes (`8bitArray`).
+- Handles special values: `NaN`, `Infinity`, `-Infinity`, `+0`, `-0`, and denormals.
 
-## How to test with Jest
-### Install Jest to project
-```
+## Installation
+
+```bash
 npm install
 ```
-### Run tests
+
+## Usage (CommonJS)
+
+```javascript
+const ieee754 = require('./'); // requires index.js in the project root
+
+// Convert number -> IEEE representation (string by default)
+const bin = ieee754.getPrecision(1000.5, { mode: 'single' });
+// -> '01000100011110100010000000000000'
+
+// Convert number -> 8-bit byte array
+const bytes = ieee754.getPrecision(1000.5, { mode: 'single', returnType: '8bitArray' });
+// -> [68, 122, 32, 0]
+
+// Convert binary string or integer array -> number
+const num = ieee754.getDecimal('01000100011110100010000000000000', { mode: 'single' });
+// -> 1000.5
+const numFromArray = ieee754.getDecimal([68, 122, 32, 0], { mode: 'single' });
+// -> 1000.5
 ```
+
+## API
+
+- `getPrecision(value, options)`
+  - `value` (number): input JS number to convert.
+  - `options` (object):
+    - `mode`: `'half' | 'single' | 'double'` (required)
+    - `returnType` (optional): `'8bitArray' | '16bitArray'`. If omitted, the function returns a binary string.
+  - Returns: binary string, or array of integers depending on `returnType`.
+
+- `getDecimal(value, options)`
+  - `value` (string | array): binary string or an array of 8‑bit/16‑bit integers representing IEEE‑754 bits.
+  - `options` (object):
+    - `mode`: `'half' | 'single' | 'double'` (required)
+  - Returns: JavaScript `number`.
+
+## Tests
+
+The project uses Jest. Run the test suite with:
+
+```bash
 npm test
 ```
+
+## Notes & tips
+
+- The implementation uses CommonJS (`require` / `exports`) and small helper modules inside `src/`:
+  - `src/decimalPrecision.js` — number -> IEEE binary string
+  - `src/precisionDecimal.js` — IEEE binary string -> number
+  - `src/shared.js` — utilities (bias, binary formatting)
+  - `src/validation.js` — simple argument validation
+
+## Contributing
+
+Contributions are welcome. The repository currently lists a number of TODOs (rounding improvements, better error handling, more tests). Opening issues or pull requests on the GitHub repo is the best way to contribute.
+
+## License
+
+This project is MIT licensed. See the `LICENSE` file for details.
