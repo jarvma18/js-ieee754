@@ -1,10 +1,11 @@
 {
   "name": "js-ieee754",
   "version": "1.0.0",
-  "description": "Javascript library to convert data with IEEE754 standard.",
+  "description": "Library to convert between numbers and IEEE754 binary representations (half/single/double precision).",
   "main": "index.js",
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "build": "tsc"
   },
   "repository": {
     "type": "git",
@@ -20,6 +21,11 @@
   },
   "homepage": "https://github.com/jarvma18/js-ieee754#readme",
   "devDependencies": {
-    "jest": "^29.5.0"
+    "jest": "^29.5.0",
+    "typescript": "^5.1.6",
+    "ts-node": "^10.9.1",
+    "ts-jest": "^29.1.0",
+    "@types/jest": "^29.5.2",
+    "@types/node": "^20.5.1"
   }
 }
