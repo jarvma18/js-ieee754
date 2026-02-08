@@ -69,6 +69,17 @@ npm test
   - `src/shared.js` — utilities (bias, binary formatting)
   - `src/validation.js` — simple argument validation
 
+## Roadmap / TODO
+
+Short, actionable items:
+
+- Core: code refactoring and performance improvements
+- Precision: improve rounding and handle rounding errors
+- Edge cases: values under 1 / denormals, underflow, overflow
+- Robustness: better error catching and invalid-input handling
+- Defaults: provide sensible defaults when `options` is omitted
+- Tests: add additional Jest coverage for edge cases and rounding
+
 ## Contributing
 
 Contributions are welcome. The repository currently lists a number of TODOs (rounding improvements, better error handling, more tests). Opening issues or pull requests on the GitHub repo is the best way to contribute.
