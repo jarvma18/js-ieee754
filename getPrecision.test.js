@@ -19,7 +19,7 @@ describe('getPrecision', () => {
   ];
 
   test.each(basicCases)(
-    'mode %s returnType %s input %p -> %p',
+    'Should return %p for input %p when mode is %s and returnType is %s',
     (mode, returnType, input, expected) => {
       const opts = {mode};
       if (returnType) opts.returnType = returnType;
@@ -91,7 +91,7 @@ describe('getPrecision special values', () => {
   specials.forEach(([name, val, cases]) => {
     describe(name, () => {
       test.each(cases)(
-        '%s %s -> %p',
+        'Should return %p when mode is %s and returnType is %s',
         (mode, returnType, expected) => {
           const opts = {mode};
           if (returnType) opts.returnType = returnType;

@@ -19,7 +19,7 @@ describe('getDecimal', () => {
   ];
 
   test.each(roundTripCases)(
-    'mode %s input %p returns %p',
+    'Should return %p when mode is %s and input is %p',
     (mode, input, expected) => {
       expect(ieee754.getDecimal(input, {mode})).toBe(expected);
     }
