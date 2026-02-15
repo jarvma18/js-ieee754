@@ -1,16 +1,18 @@
 # js-ieee754
 
-Lightweight JavaScript helpers to convert between JS numbers and IEEE‑754 binary representations (half/single/double precision).
+Lightweight helpers to convert between JavaScript numbers and IEEE‑754 binary representations (half/single/double precision).
 
-This repo provides two main functions exposed from `index.js`:
+This repository has been migrated to **TypeScript**. Source files live under `src/` and compiled JavaScript and type declarations are emitted to `lib/` when you run the build script.
 
-- `getPrecision(number, options)` — convert a JavaScript `number` into an IEEE‑754 representation.
-- `getDecimal(value, options)` — convert an IEEE‑754 representation (binary string or integer array) back to a JS `number`.
+---
 
-Quick highlights
-- Supports `half` (16‑bit), `single` (32‑bit) and `double` (64‑bit) modes.
-- Output can be a binary string, an array of 16‑bit integers (`16bitArray`) or an array of 8‑bit bytes (`8bitArray`).
-- Handles special values: `NaN`, `Infinity`, `-Infinity`, `+0`, `-0`, and denormals.
+## Quick highlights
+
+- Supports `half` (16‑bit), `single` (32‑bit) and `double` (64‑bit) precision.
+- Exposes two primary functions:
+  - `getPrecision(number, options)`
+  - `getDecimal(value, options)`
+- Handles special values: `NaN`, `Infinity`, `-Infinity`, `+0`, `-0` and denormals.
 
 ## Installation
 
@@ -18,119 +20,66 @@ Quick highlights
 npm install
 ```
 
-## Usage (CommonJS)
-
-```javascript
-const ieee754 = require('./'); // requires index.js in the project root
-
-// Convert number -> IEEE representation (string by default)
-const bin = ieee754.getPrecision(1000.5, { mode: 'single' });
-// -> '01000100011110100010000000000000'
-
-// Convert number -> 8-bit byte array
-const bytes = ieee754.getPrecision(1000.5, { mode: 'single', returnType: '8bitArray' });
-// -> [68, 122, 32, 0]
-
-// Convert binary string or integer array -> number
-const num = ieee754.getDecimal('01000100011110100010000000000000', { mode: 'single' });
-// -> 1000.5
-const numFromArray = ieee754.getDecimal([68, 122, 32, 0], { mode: 'single' });
-// -> 1000.5
-```
-
-## API
-
-- `getPrecision(value, options)`
-  - `value` (number): input JS number to convert.
-  - `options` (object):
-    - `mode`: `'half' | 'single' | 'double'` (required)
-    - `returnType` (optional): `'8bitArray' | '16bitArray'`. If omitted, the function returns a binary string.
-  - Returns: binary string, or array of integers depending on `returnType`.
-
-- `getDecimal(value, options)`
-  - `value` (string | array): binary string or an array of 8‑bit/16‑bit integers representing IEEE‑754 bits.
-  - `options` (object):
-    - `mode`: `'half' | 'single' | 'double'` (required)
-  - Returns: JavaScript `number`.
-
-## Tests
-
-The project uses Jest. Run the test suite with:
-# js-ieee754
-
-Lightweight helpers to convert between JS numbers and IEEE‑754 binary representations (half/single/double precision).
-
-This project has been migrated to TypeScript. The source files live in `src/` (TypeScript) and the package emits compiled JavaScript and type declarations to `lib/`.
-
-Quick highlights
-
-- Supports `half` (16‑bit), `single` (32‑bit) and `double` (64‑bit) modes.
-- Exposes two primary functions: `getPrecision(number, options)` and `getDecimal(value, options)`.
-- Handles special values: `NaN`, `Infinity`, `-Infinity`, `+0`, `-0`, and denormals.
-
-Installation
-
-```bash
-npm install
-```
-
-Build (TypeScript)
+## Build (TypeScript)
 
 ```bash
 npm run build
 # emits compiled JS and type declarations to lib/
 ```
 
-Tests
+## Tests
 
-Tests run under Jest with `ts-jest`, so they can execute against the TypeScript sources directly. Run the test suite with:
+Tests run under Jest with `ts-jest`, allowing them to execute against the TypeScript sources directly. Run the suite with:
 
 ```bash
 npm test
 ```
 
-Usage
+## Usage
 
-CommonJS (Node):
+### CommonJS (Node)
 
 ```javascript
 const ieee754 = require('./'); // loads compiled lib/index.js when installed
+
 const bin = ieee754.getPrecision(1000.5, { mode: 'single' });
+const bytes = ieee754.getPrecision(1000.5, { mode: 'single', returnType: '8bitArray' });
+const num = ieee754.getDecimal('01000100011110100010000000000000', { mode: 'single' });
 ```
 
-ESM / TypeScript import:
+### ESM / TypeScript import
 
 ```ts
 import * as ieee754 from './';
+
 const bytes = ieee754.getPrecision(1000.5, { mode: 'single', returnType: '8bitArray' });
 ```
 
-API (summary)
+## API Summary
 
-- `getPrecision(value: number, options)`
-  - `options.mode`: `'half' | 'single' | 'double'` (required)
-  - `options.returnType` (optional): controls the output form (binary string or numeric array)
+### `getPrecision(value: number, options)`
+- `options.mode`: `'half' | 'single' | 'double'` (required)
+- `options.returnType` (optional): `'8bitArray' | '16bitArray'`. If omitted, returns a binary string.
+- Returns a binary string or an array of integers depending on `returnType`.
 
-- `getDecimal(value: string | number[], options)`
-  - `options.mode`: `'half' | 'single' | 'double'` (required)
-  - Accepts binary strings or arrays of integers representing bytes/words and returns a JS `number`.
+### `getDecimal(value: string | number[], options)`
+- `value`: binary string or array of 8‑bit/16‑bit integers representing IEEE‑754 bits.
+- `options.mode`: `'half' | 'single' | 'double'` (required)
+- Returns a JavaScript `number`.
 
-Project layout
+## Project layout
 
-- `index.ts` — library entry (exports `getPrecision`, `getDecimal`).
-- `src/*.ts` — implementation modules (migrated from JS).
-- `lib/` — compiled output (`lib/index.js`, `lib/index.d.ts`) after `npm run build`.
-- `package.json` is configured to point `main` at `lib/index.js` and `types` at `lib/index.d.ts`.
+- `index.ts` — library entry point exporting `getPrecision` and `getDecimal`.
+- `src/*.ts` — implementation modules (migrated from original JS).
+- `lib/` — compiled output (`lib/index.js`, `lib/index.d.ts`) generated by the build script.
+- `package.json` points `main` at `lib/index.js` and `types` at `lib/index.d.ts`.
 
-Notes
+> **Note:** Tests use `ts-jest` so you don’t need to build before running them.
 
-- Tests use `ts-jest` so they run against TypeScript sources; you do not need to build before running tests.
-- The public API and usage remain the same, but the codebase is now typed and emits `.d.ts` files for consumers.
+## Contributing
 
-Contributing
+Contributions are welcome! Open issues or PRs, and when modifying code prefer editing TypeScript sources and run the test suite locally.
 
-Contributions are welcome — please open issues or PRs. If you work on code, prefer making TypeScript changes and run the test suite locally.
-
-License
+## License
 
 This project is MIT licensed. See the `LICENSE` file for details.
