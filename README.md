@@ -76,6 +76,17 @@ const bytes = ieee754.getPrecision(1000.5, { mode: 'single', returnType: '8bitAr
 
 > **Note:** Tests use `ts-jest` so you don’t need to build before running them.
 
+## TODOs
+
+The project currently works but there are several areas for improvement:
+
+- **Core:** refactor code for clarity and apply performance optimizations.
+- **Precision:** improve rounding logic and address known rounding-error scenarios.
+- **Edge cases:** add robust handling for values under 1 (denormals), as well as underflow and overflow conditions.
+- **Robustness:** catch errors more thoroughly and provide better feedback for invalid input.
+- **Defaults:** supply sensible defaults when `options` are omitted or partially specified.
+- **Tests:** expand the Jest test suite with additional coverage for edge cases and rounding behaviour.
+
 ## Contributing
 
 Contributions are welcome! Open issues or PRs, and when modifying code prefer editing TypeScript sources and run the test suite locally.
