@@ -1,4 +1,4 @@
-import * as shared from './shared';
+import * as utils from './utils';
 
 function createMaxExponent(bits: number, mantissa: number): number {
   return Math.pow(2, (bits - mantissa - 1)) - 1;
@@ -31,7 +31,7 @@ function calculateDecimal(sign: number, exponent: number, fraction: number, bias
 }
 
 export function precisionToDecimal(value: string, bits: number, mantissa: number): number {
-  let bias = shared.createBias(bits - mantissa - 1);
+  let bias = utils.createBias(bits - mantissa - 1);
   let sign = parseInt(value[0], 2);
   let maxExponent = createMaxExponent(bits, mantissa);
   let exponentStr = '';

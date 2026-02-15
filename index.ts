@@ -1,7 +1,7 @@
 import * as decimalPrecision from './src/decimalPrecision';
 import * as precisionDecimal from './src/precisionDecimal';
-import * as validation from './src/validation';
-import * as shared from './src/shared';
+import * as validationHelpers from './src/validationHelpers';
+import * as shared from './src/utils';
 
 type PrecisionMode = 'half' | 'single' | 'double';
 type ReturnType = '8bitArray' | '16bitArray';
@@ -65,7 +65,7 @@ function precisionToType(precision: string, options?: GetPrecisionOptions): stri
 
 export function getDecimal(value: string | number[], options: GetDecimalOptions): number | undefined {
   try {
-    validation.validate('precisionDecimal', value, options);
+    validationHelpers.validate('precisionDecimal', value, options);
     const bits = setDefaultBitsForPrecision(options.mode);
     const mantissa = setDefaultMantissaForPrecision(options.mode);
     let binaryValue = typeof value === 'object' ? createBinaryString(value, bits) : value;
@@ -78,7 +78,7 @@ export function getDecimal(value: string | number[], options: GetDecimalOptions)
 
 export function getPrecision(value: number, options: GetPrecisionOptions): string | number[] | undefined {
   try {
-    validation.validate('decimalPrecision', value, options);
+    validationHelpers.validate('decimalPrecision', value, options);
     const bits = setDefaultBitsForPrecision(options.mode);
     const mantissa = setDefaultMantissaForPrecision(options.mode);
     let precision = decimalPrecision.decimalToPrecision(value, bits, mantissa);

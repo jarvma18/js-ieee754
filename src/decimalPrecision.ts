@@ -1,4 +1,4 @@
-import * as shared from './shared';
+import * as utils from './utils';
 
 function createBinaryFromFraction(value: number, mantissa: number, startFraction: number, round: boolean): string {
   let fraction = '';
@@ -80,7 +80,7 @@ function buildPrecisionForUnderOneValues(
   if (value < minExponent) {
     isDenormal = true;
     value = value / minExponent;
-    exponent = shared.createUnsignedBinaryString(0, bits - mantissa - 1);
+    exponent = utils.createUnsignedBinaryString(0, bits - mantissa - 1);
   }
   else {
     let counter = 0;
@@ -90,7 +90,7 @@ function buildPrecisionForUnderOneValues(
       value = ((value / denominator) >= 1 && (value / denominator) < 2) ? (value / denominator) : value;
     }
     const exponentValue = -1 * counter + bias;
-    exponent = shared.createUnsignedBinaryString(exponentValue, bits - mantissa - 1);
+    exponent = utils.createUnsignedBinaryString(exponentValue, bits - mantissa - 1);
   }
   let startFraction = value - Math.trunc(value);
   let currentValue = startFraction;
@@ -111,7 +111,7 @@ function buildPrecisionForOverOneValues(
 ): string {
   let integer = ((value >>> 0).toString(2));
   const exponentValue = integer.length - 1 + bias;
-  let exponent = shared.createUnsignedBinaryString(exponentValue, bits - mantissa - 1);
+  let exponent = utils.createUnsignedBinaryString(exponentValue, bits - mantissa - 1);
   let startFraction = value - Math.trunc(value);
   let currentValue = startFraction;
   let fraction = createBinaryFromFraction(currentValue, mantissa, startFraction, round);
@@ -135,7 +135,7 @@ export function decimalToPrecision(value: number, bits: number, mantissa: number
   let isDenormal = false;
   let round = true;
   let sign = createSign(value);
-  let bias = shared.createBias(bits - mantissa - 1);
+  let bias = utils.createBias(bits - mantissa - 1);
   let minExponent = calculateMinExponent(bias);
   value = calculateValueWithSign(sign, value);
   if (value < 1) {
